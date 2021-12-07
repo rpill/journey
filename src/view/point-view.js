@@ -1,4 +1,5 @@
 import { getDateDifference, formatDate, toCapitalize } from '../utils';
+import {createElement} from '../render.js';
 
 const createScheduleTemplate = (dateFrom, dateTo) => {
   const durationMinutes = getDateDifference(dateFrom, dateTo, 'minute');
@@ -46,7 +47,7 @@ const createPointOffersTemplate = (offers) => {
     </ul>`;
 };
 
-export const createPointTemplate = (point) => {
+const createPointTemplate = (point) => {
   const {type, destination, dateFrom, dateTo, offers, price, isFavorite} = point;
   const offersTemplate = createPointOffersTemplate(offers);
   const scheduleTemplate = createScheduleTemplate(dateFrom, dateTo);
@@ -79,3 +80,28 @@ export const createPointTemplate = (point) => {
     </button>
   </div>`;
 };
+
+export default class PointView {
+  #element = null;
+  #point = null;
+
+  constructor(point) {
+    this.#point = point;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createPointTemplate(this.#point);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

@@ -1,5 +1,15 @@
-import { TYPES, OFFERS, DESTINATIONS } from '../const';
+import { TYPES, DESTINATIONS, OFFERS } from '../const';
 import { formatDate, toCapitalize, toKebabCase } from '../utils';
+import {createElement} from '../render.js';
+
+const BLANK_POINT = {
+  type: 'taxi',
+  dateFrom: new Date(),
+  dateTo: new Date(),
+  destination: '',
+  offers: [],
+  price: '',
+};
 
 const createPointEditTypesTemplate = (type) => {
 
@@ -79,8 +89,11 @@ const createPointEditOffersTemplate = (type, offers) => {
 };
 
 const createPointEditDestinationTemplate = (destination) => {
+  if(destination === '') {
+    return '';
+  }
+
   const {description, pictures} = DESTINATIONS.find(({name}) => name === destination);
-  console.log(destination);
 
   if(description === '' && pictures.length === 0) {
     return '';
@@ -100,9 +113,15 @@ const createPointEditDestinationTemplate = (destination) => {
   </section>`;
 };
 
-export const createPointEditTemplate = (point) => {
-
-  const {type, destination, dateFrom, dateTo, offers, price} = point;
+const createPointAddTemplate = (point) => {
+  const {
+    type = 'taxi',
+    dateFrom = new Date(),
+    dateTo = new Date(),
+    destination = '',
+    offers = [],
+    price = '',
+  } = point;
 
   const typesTemplate = createPointEditTypesTemplate(type);
   const destinationsListTemplate = createPointEditDestinationsListTemplate(destination, type);
@@ -131,10 +150,7 @@ export const createPointEditTemplate = (point) => {
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">Delete</button>
-      <button class="event__rollup-btn" type="button">
-        <span class="visually-hidden">Open event</span>
-      </button>
+      <button class="event__reset-btn" type="reset">Cancel</button>
     </header>
     ${offersTemplate && destinationTemplate ? `<section class="event__details">
         ${offersTemplate}
@@ -142,3 +158,24 @@ export const createPointEditTemplate = (point) => {
       </section>` : ''}
   </form>`;
 };
+
+export default class PointAddView {
+  #element = null;
+  #point = BLANK_POINT;
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createPointAddTemplate(this.#point);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

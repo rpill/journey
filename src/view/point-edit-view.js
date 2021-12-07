@@ -1,5 +1,6 @@
-import { TYPES, DESTINATIONS, OFFERS } from '../const';
+import { TYPES, OFFERS, DESTINATIONS } from '../const';
 import { formatDate, toCapitalize, toKebabCase } from '../utils';
+import {createElement} from '../render.js';
 
 const createPointEditTypesTemplate = (type) => {
 
@@ -79,10 +80,6 @@ const createPointEditOffersTemplate = (type, offers) => {
 };
 
 const createPointEditDestinationTemplate = (destination) => {
-  if(destination === '') {
-    return '';
-  }
-
   const {description, pictures} = DESTINATIONS.find(({name}) => name === destination);
 
   if(description === '' && pictures.length === 0) {
@@ -103,15 +100,9 @@ const createPointEditDestinationTemplate = (destination) => {
   </section>`;
 };
 
-export const createPointAddTemplate = (point = {}) => {
-  const {
-    type = 'taxi',
-    dateFrom = new Date(),
-    dateTo = new Date(),
-    destination = '',
-    offers = [],
-    price = '',
-  } = point;
+const createPointEditTemplate = (point) => {
+
+  const {type, destination, dateFrom, dateTo, offers, price} = point;
 
   const typesTemplate = createPointEditTypesTemplate(type);
   const destinationsListTemplate = createPointEditDestinationsListTemplate(destination, type);
@@ -140,7 +131,10 @@ export const createPointAddTemplate = (point = {}) => {
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">Cancel</button>
+      <button class="event__reset-btn" type="reset">Delete</button>
+      <button class="event__rollup-btn" type="button">
+        <span class="visually-hidden">Open event</span>
+      </button>
     </header>
     ${offersTemplate && destinationTemplate ? `<section class="event__details">
         ${offersTemplate}
@@ -148,3 +142,28 @@ export const createPointAddTemplate = (point = {}) => {
       </section>` : ''}
   </form>`;
 };
+
+export default class PointEditView {
+  #element = null;
+  #point = null;
+
+  constructor(point) {
+    this.#point = point;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createPointEditTemplate(this.#point);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}
