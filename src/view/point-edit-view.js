@@ -1,6 +1,6 @@
-import { TYPES, OFFERS, DESTINATIONS } from '../const';
-import { formatDate, toCapitalize, toKebabCase } from '../utils';
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view.js';
+import { TYPES, OFFERS, DESTINATIONS } from '../const.js';
+import { formatDate, toCapitalize, toKebabCase } from '../utils/point.js';
 
 const createPointEditTypesTemplate = (type) => {
 
@@ -143,27 +143,35 @@ const createPointEditTemplate = (point) => {
   </form>`;
 };
 
-export default class PointEditView {
-  #element = null;
+export default class PointEditView extends AbstractView {
   #point = null;
 
   constructor(point) {
+    super();
     this.#point = point;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createPointEditTemplate(this.#point);
   }
 
-  removeElement() {
-    this.#element = null;
+  setFormSubmitHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element.addEventListener('submit', this.#formSubmitHandler);
+  }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  }
+
+  setFormCloseHandler = (callback) => {
+    this._callback.formClose = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formCloseHandler);
+  }
+
+  #formCloseHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formClose();
   }
 }

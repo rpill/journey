@@ -1,5 +1,5 @@
-import { getDateDifference, formatDate, toCapitalize } from '../utils';
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view.js';
+import { getDateDifference, formatDate, toCapitalize } from '../utils/point.js';
 
 const createScheduleTemplate = (dateFrom, dateTo) => {
   const durationMinutes = getDateDifference(dateFrom, dateTo, 'minute');
@@ -81,27 +81,25 @@ const createPointTemplate = (point) => {
   </div>`;
 };
 
-export default class PointView {
-  #element = null;
+export default class PointView extends AbstractView {
   #point = null;
 
   constructor(point) {
+    super();
     this.#point = point;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createPointTemplate(this.#point);
   }
 
-  removeElement() {
-    this.#element = null;
+  setEditClickHandler = (callback) => {
+    this._callback.editClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+  }
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editClick();
   }
 }

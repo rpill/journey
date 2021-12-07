@@ -1,6 +1,6 @@
-import { TYPES, DESTINATIONS, OFFERS } from '../const';
-import { formatDate, toCapitalize, toKebabCase } from '../utils';
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view.js';
+import { TYPES, DESTINATIONS, OFFERS } from '../const.js';
+import { formatDate, toCapitalize, toKebabCase } from '../utils/point.js';
 
 const BLANK_POINT = {
   type: 'taxi',
@@ -159,23 +159,10 @@ const createPointAddTemplate = (point) => {
   </form>`;
 };
 
-export default class PointAddView {
-  #element = null;
+export default class PointAddView extends AbstractView {
   #point = BLANK_POINT;
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
 
   get template() {
     return createPointAddTemplate(this.#point);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

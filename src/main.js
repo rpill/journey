@@ -8,8 +8,7 @@ import PointAddView from './view/point-add-view.js';
 import PointEditView from './view/point-edit-view.js';
 import PointView from './view/point-view.js';
 import NoPointView from './view/no-point-view.js';
-import {render, RenderPosition} from './render.js';
-
+import {render, RenderPosition, replace, remove} from './utils/render.js';
 import {generatePoint} from './mock/point.js';
 
 const POINT_COUNT = 20;
@@ -19,16 +18,16 @@ const points = Array.from({length: POINT_COUNT}, generatePoint);
 const sitePageBodyElement = document.querySelector('.page-body');
 const tripMainElement = sitePageBodyElement.querySelector('.trip-main');
 
-render(tripMainElement, new TripInfoView().element, RenderPosition.AFTERBEGIN);
+render(tripMainElement, new TripInfoView(), RenderPosition.AFTERBEGIN);
 
 const tripControlsElement = tripMainElement.querySelector('.trip-controls');
 const tripNavigationElement = tripControlsElement.querySelector('.trip-controls__navigation');
 
-render(tripNavigationElement, new TripTabsView().element, RenderPosition.BEFOREEND);
+render(tripNavigationElement, new TripTabsView(), RenderPosition.BEFOREEND);
 
 const tripFiltersElement = tripControlsElement.querySelector('.trip-controls__filters');
 
-render(tripFiltersElement, new TripFiltersView().element, RenderPosition.BEFOREEND);
+render(tripFiltersElement, new TripFiltersView(), RenderPosition.BEFOREEND);
 
 const sitePageMainElement = sitePageBodyElement.querySelector('.page-main');
 const tripEventsElement = sitePageMainElement.querySelector('.trip-events');
@@ -39,11 +38,11 @@ const renderPoint = (pointListElement, point) => {
   const pointEditComponent = new PointEditView(point);
 
   const replaceCardToForm = () => {
-    pointListItemComponent.element.replaceChild(pointEditComponent.element, pointComponent.element);
+    replace(pointEditComponent, pointComponent);
   };
 
   const replaceFormToCard = () => {
-    pointListItemComponent.element.replaceChild(pointComponent.element, pointEditComponent.element);
+    replace(pointComponent, pointEditComponent);
   };
 
   const onEscKeyDown = (evt) => {
@@ -54,38 +53,38 @@ const renderPoint = (pointListElement, point) => {
     }
   };
 
-  pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+  pointComponent.setEditClickHandler(() => {
     replaceCardToForm();
     document.addEventListener('keydown', onEscKeyDown);
   });
 
-  pointEditComponent.element.addEventListener('submit', (evt) => {
-    evt.preventDefault();
+  pointEditComponent.setFormSubmitHandler(() => {
     replaceFormToCard();
     document.removeEventListener('keydown', onEscKeyDown);
   });
 
-  pointEditComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+  pointEditComponent.setFormCloseHandler(() => {
     replaceFormToCard();
+    document.removeEventListener('keydown', onEscKeyDown);
   });
 
-  render(pointListItemComponent.element, pointComponent.element, RenderPosition.AFTERBEGIN);
+  render(pointListItemComponent, pointComponent, RenderPosition.AFTERBEGIN);
 
-  render(pointListElement, pointListItemComponent.element, RenderPosition.BEFOREEND);
+  render(pointListElement, pointListItemComponent, RenderPosition.BEFOREEND);
 };
 
 const renderPointList = (pointListContainer, pointsList) => {
 
   if (pointsList.length === 0) {
-    render(pointListContainer, new NoPointView().element, RenderPosition.AFTERBEGIN);
+    render(pointListContainer, new NoPointView(), RenderPosition.AFTERBEGIN);
     return;
   }
   const pointListComponent = new PointListView();
 
-  render(pointListContainer, new TripSortView().element, RenderPosition.BEFOREEND);
-  render(pointListContainer, pointListComponent.element, RenderPosition.BEFOREEND);
+  render(pointListContainer, new TripSortView(), RenderPosition.BEFOREEND);
+  render(pointListContainer, pointListComponent, RenderPosition.BEFOREEND);
 
-  pointsList.forEach((point) => renderPoint(pointListComponent.element, point));
+  pointsList.forEach((point) => renderPoint(pointListComponent, point));
 };
 
 renderPointList(tripEventsElement, points);
